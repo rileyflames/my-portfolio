@@ -1,3 +1,6 @@
+// (removed duplicate/invalid code at the top)
+
+// ...existing code...
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -30,6 +33,11 @@ export class UserService {
 			throw new NotFoundException(`User with id ${id} not found`);
 		}
 		return user;
+	}
+
+	// Find a user by email (for authentication)
+	async findByEmail(email: string): Promise<User | null> {
+		return this.userRepository.findOne({ where: { email } });
 	}
 
 
