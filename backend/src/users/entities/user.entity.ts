@@ -34,7 +34,7 @@ export class User {
     })
     role: UserRole
 
-    @Field()
+    
     @Column()
     password: string
 
