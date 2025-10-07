@@ -1,7 +1,4 @@
-// (removed duplicate/invalid code at the top)
-
-// ...existing code...
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -10,23 +7,34 @@ import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import * as argon2 from 'argon2';
 
-
-
+/**
+ * UserService handles all user-related business logic
+ * This service interacts with the database through TypeORM repository
+ */
 @Injectable()
 export class UserService {
 
 	constructor( 
-		// inject the TypeORM repo for the User entity
+		// Inject the TypeORM repository for the User entity
+		// This gives us access to database operations for users
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>
 	){}
 
-	// Find all users in the database
+	/**
+	 * Retrieves all users from the database
+	 * @returns Promise<User[]> - Array of all users
+	 */
 	async findAll(): Promise<User[]> {
-		return this.userRepository.find()
+		return this.userRepository.find();
 	}
 
-	// get one user
+	/**
+	 * Finds a single user by their ID
+	 * @param id - The user's unique identifier
+	 * @returns Promise<User> - The user object
+	 * @throws NotFoundException if user doesn't exist
+	 */
 	async findOne(id: string): Promise<User> {
 		const user = await this.userRepository.findOne({ where: { id: id } });
 		if (!user) {
@@ -35,54 +43,91 @@ export class UserService {
 		return user;
 	}
 
-	// Find a user by email (for authentication)
+	/**
+	 * Finds a user by their email address (used for authentication)
+	 * @param email - The user's email address
+	 * @returns Promise<User | null> - User object or null if not found
+	 */
 	async findByEmail(email: string): Promise<User | null> {
 		return this.userRepository.findOne({ where: { email } });
 	}
 
-
-
-	// Helper method to hash a password
+	/**
+	 * Private helper method to hash passwords using Argon2
+	 * Argon2 is a secure password hashing algorithm
+	 * @param password - Plain text password
+	 * @returns Promise<string> - Hashed password
+	 */
 	private async hashPassword(password: string): Promise<string> {
 		return argon2.hash(password);
 	}
 
-	// create a new user and save to database
+	/**
+	 * Creates a new user in the database
+	 * @param createUserInput - User data from the GraphQL input
+	 * @returns Promise<User> - The created user object
+	 * @throws ConflictException if email already exists
+	 */
 	async create(createUserInput: CreateUserInput): Promise<User> {
-		// Hash the password before saving
+		// Check if user with this email already exists
+		const existingUser = await this.findByEmail(createUserInput.email);
+		if (existingUser) {
+			throw new ConflictException('User with this email already exists');
+		}
+
+		// Hash the password before saving to database
+		// Never store plain text passwords!
 		const hashedPassword = await this.hashPassword(createUserInput.password);
+		
 		// Create a new user object with the hashed password
+		// The spread operator (...) copies all properties from createUserInput
 		const newUser = this.userRepository.create({
 			...createUserInput,
 			password: hashedPassword,
 		});
+		
+		// Save the user to the database and return the result
 		return this.userRepository.save(newUser);
 	}
 
-	// update a user by id
+	/**
+	 * Updates an existing user's information
+	 * @param id - The user's ID to update
+	 * @param updateUserInput - Updated user data
+	 * @returns Promise<User | null> - Updated user or null if not found
+	 */
 	async update(id: string, updateUserInput: UpdateUserInput): Promise<User | null> {
-		// Find the user by id
-		const user = await this.userRepository.findOne({ where: { id: id.toString() } });
+		// First, find the user by ID
+		const user = await this.userRepository.findOne({ where: { id: id } });
 		if (!user) {
-			// If user not found, return null
+			// Return null if user doesn't exist
 			return null;
 		}
+		
 		// If password is being updated, hash it first
 		if (updateUserInput.password) {
 			updateUserInput.password = await this.hashPassword(updateUserInput.password);
 		}
-		// Merge the update data into the user
+		
+		// Merge the update data into the existing user object
+		// Object.assign copies properties from updateUserInput to user
 		Object.assign(user, updateUserInput);
-		// Save the updated user
+		
+		// Save the updated user to the database
 		return this.userRepository.save(user);
 	}
 
-	// delete a user by id
+	/**
+	 * Deletes a user from the database
+	 * @param id - The user's ID to delete
+	 * @returns Promise<boolean> - True if deleted, false if not found
+	 */
 	async remove(id: string): Promise<boolean> {
-		// Delete the user from the database
-		const result = await this.userRepository.delete(id.toString());
-		// If affected > 0, the user was deleted
+		// Attempt to delete the user from the database
+		const result = await this.userRepository.delete(id);
+		
+		// Check if any rows were affected (deleted)
+		// The ?? operator provides a default value if affected is undefined
 		return (result.affected ?? 0) > 0;
 	}
-
 }
