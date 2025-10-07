@@ -5,6 +5,7 @@ import { AboutMe } from './entities/aboutMe.entity';
 import { CreateAboutMeInput } from './dto/create-aboutMe.input';
 import { UpdateAboutMeInput } from './dto/update-aboutMe.input';
 import { TechnologiesService } from '../technologies/technologies.service';
+import { Tech } from '../technologies/entities/tech.entity';
 
 /**
  * AboutMeService handles personal information management
@@ -49,7 +50,7 @@ export class AboutMeService {
     }
 
     // Load technologies if provided
-    let technologies = [];
+    let technologies: Tech[] = [];
     if (createAboutMeInput.technologyIds && createAboutMeInput.technologyIds.length > 0) {
       technologies = await this.technologiesService.findByIds(createAboutMeInput.technologyIds);
       
@@ -73,10 +74,16 @@ export class AboutMeService {
     const savedAboutMe = await this.aboutMeRepository.save(newAboutMe);
     
     // Return with all relations loaded
-    return this.aboutMeRepository.findOne({
+    const result = await this.aboutMeRepository.findOne({
       where: { id: savedAboutMe.id },
       relations: ['technologies', 'social']
     });
+    
+    if (!result) {
+      throw new Error('Failed to retrieve created AboutMe record');
+    }
+    
+    return result;
   }
 
   /**
@@ -121,10 +128,16 @@ export class AboutMeService {
     await this.aboutMeRepository.save(aboutMe);
     
     // Return with all relations loaded
-    return this.aboutMeRepository.findOne({
+    const result = await this.aboutMeRepository.findOne({
       where: { id: aboutMe.id },
       relations: ['technologies', 'social']
     });
+    
+    if (!result) {
+      throw new Error('Failed to retrieve updated AboutMe record');
+    }
+    
+    return result;
   }
 
   /**

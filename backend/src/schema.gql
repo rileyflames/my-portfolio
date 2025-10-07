@@ -1,0 +1,370 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Tech {
+  id: ID!
+  name: String!
+  icon: String!
+  level: TechLevel!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Skill level for a technology"""
+enum TechLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Contributors {
+  id: ID!
+  name: String!
+  email: String!
+  github: String!
+  projects: [Projects!]!
+}
+
+type Projects {
+  id: ID!
+  name: String!
+  githubLink: String!
+  liveUrl: String
+  progress: String!
+  imageUrl: String
+  description: String!
+  technologies: [Tech!]!
+  technologyIds: [String!]
+  tags: [String!]
+  contributors: [Contributors!]
+  createdBy: User!
+  editedBy: User
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  role: UserRole!
+  createdProjects: [Projects!]
+  editedProjects: [Projects!]
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""User role determining access permissions"""
+enum UserRole {
+  ADMIN
+  EDITOR
+}
+
+type LoginResponse {
+  access_token: String!
+  user: User!
+}
+
+type SocialMedia {
+  id: ID!
+  name: String!
+  link: String!
+  icon: String!
+  aboutMe: AboutMe!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AboutMe {
+  id: ID!
+  fullName: String!
+  dob: String!
+  startedCoding: String!
+  bio: String!
+  technologies: [Tech!]!
+  social: [SocialMedia!]!
+  imageUrl: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Message {
+  id: ID!
+  fullName: String!
+  email: String!
+  city: String!
+  subject: String!
+  messageDescription: String!
+  isRead: Boolean!
+  readAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type MessageStatsType {
+  total: Int!
+  unread: Int!
+  read: Int!
+  deleted: Int!
+}
+
+type Query {
+  users: [User!]!
+  user(id: String!): User
+
+  """Get all technologies/skills"""
+  technologies: [Tech!]!
+
+  """Get a single technology by ID"""
+  technology(id: String!): Tech
+
+  """Get all projects with their technologies and creators"""
+  projects: [Projects!]!
+
+  """Get a single project by ID"""
+  project(id: String!): Projects
+
+  """Get all projects created by a specific user"""
+  projectsByCreator(creatorId: String!): [Projects!]!
+
+  """Get projects filtered by progress status"""
+  projectsByProgress(progress: String!): [Projects!]!
+
+  """Get all contributors with their projects"""
+  contributors: [Contributors!]!
+
+  """Get a single contributor by ID"""
+  contributor(id: String!): Contributors
+
+  """Get personal information and bio"""
+  aboutMe: AboutMe
+
+  """Get all social media links"""
+  socialMediaLinks: [SocialMedia!]!
+
+  """Get social media links for the AboutMe profile"""
+  mySocialMediaLinks: [SocialMedia!]!
+
+  """Get a single social media link by ID"""
+  socialMediaLink(id: String!): SocialMedia
+
+  """Get all messages with optional filtering (admin only)"""
+  messages(filters: MessageFiltersInput): [Message!]!
+
+  """Get a single message by ID (admin only)"""
+  message(id: String!): Message
+
+  """Get message count statistics (admin only)"""
+  messageStats: MessageStatsType!
+
+  """Get all soft-deleted messages (admin only)"""
+  deletedMessages: [Message!]!
+}
+
+input MessageFiltersInput {
+  isRead: Boolean
+  email: String
+  city: String
+  searchTerm: String
+}
+
+type Mutation {
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(id: String!, updateUserInput: UpdateUserInput!): User
+  deleteUser(id: String!): Boolean!
+  login(input: LoginInput!): LoginResponse!
+
+  """Create a new technology/skill"""
+  createTechnology(input: CreateTechnologyInput!): Tech!
+
+  """Update an existing technology/skill"""
+  updateTechnology(id: String!, input: UpdateTechnologyInput!): Tech!
+
+  """Delete a technology/skill"""
+  deleteTechnology(id: String!): Boolean!
+
+  """Upload an icon for a technology"""
+  uploadTechnologyIcon(file: Upload!): String!
+
+  """Upload a profile image for AboutMe"""
+  uploadProfileImage(file: Upload!): String!
+
+  """Upload and set image for a project"""
+  uploadProjectImage(projectId: String!, file: Upload!): Projects!
+
+  """Upload a general image file"""
+  uploadImage(file: Upload!, folder: String): String!
+
+  """Create a new project"""
+  createProject(input: CreateProjectInput!): Projects!
+
+  """Update an existing project"""
+  updateProject(id: String!, input: UpdateProjectInput!): Projects!
+
+  """Delete a project"""
+  deleteProject(id: String!): Boolean!
+
+  """Create a new contributor"""
+  createContributor(input: CreateContributorInput!): Contributors!
+
+  """Update an existing contributor"""
+  updateContributor(id: String!, input: UpdateContributorInput!): Contributors!
+
+  """Delete a contributor"""
+  deleteContributor(id: String!): Boolean!
+
+  """Create personal information (should only be done once)"""
+  createAboutMe(input: CreateAboutMeInput!): AboutMe!
+
+  """Update personal information"""
+  updateAboutMe(input: UpdateAboutMeInput!): AboutMe!
+
+  """Delete personal information"""
+  deleteAboutMe: Boolean!
+
+  """Upload and set profile image for AboutMe"""
+  uploadAndSetProfileImage(file: Upload!): AboutMe!
+
+  """Create a new social media link"""
+  createSocialMediaLink(input: CreateSocialMediaInput!): SocialMedia!
+
+  """Update an existing social media link"""
+  updateSocialMediaLink(id: String!, input: UpdateSocialMediaInput!): SocialMedia!
+
+  """Delete a social media link"""
+  deleteSocialMediaLink(id: String!): Boolean!
+
+  """Create a new message (public endpoint for contact form)"""
+  createMessage(input: CreateMessageInput!): Message!
+
+  """Mark a message as read (admin only)"""
+  markMessageAsRead(id: String!): Message!
+
+  """Mark a message as unread (admin only)"""
+  markMessageAsUnread(id: String!): Message!
+
+  """Soft delete a message (admin only)"""
+  softDeleteMessage(id: String!): Boolean!
+
+  """Restore a soft-deleted message (admin only)"""
+  restoreMessage(id: String!): Message!
+
+  """Permanently delete a message - WARNING: Cannot be undone! (admin only)"""
+  permanentDeleteMessage(id: String!): Boolean!
+}
+
+input CreateUserInput {
+  name: String!
+  email: String!
+  password: String!
+  role: String
+}
+
+input UpdateUserInput {
+  name: String
+  email: String
+  password: String
+  role: String
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input CreateTechnologyInput {
+  name: String!
+  icon: String!
+  level: TechLevel!
+}
+
+input UpdateTechnologyInput {
+  name: String
+  icon: String
+  level: TechLevel
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+input CreateProjectInput {
+  name: String!
+  githubLink: String!
+  liveUrl: String
+  progress: String!
+  imageUrl: String
+  description: String!
+  technologyIds: [String!]
+  tags: [String!]
+  contributorIds: [String!]
+  createdById: String!
+}
+
+input UpdateProjectInput {
+  name: String
+  githubLink: String
+  liveUrl: String
+  progress: String
+  imageUrl: String
+  description: String
+  technologyIds: [String!]
+  tags: [String!]
+  contributorIds: [String!]
+  editedById: String
+}
+
+input CreateContributorInput {
+  name: String!
+  email: String!
+  github: String!
+}
+
+input UpdateContributorInput {
+  name: String
+  email: String
+  github: String
+}
+
+input CreateAboutMeInput {
+  fullName: String!
+  dob: String!
+  startedCoding: String!
+  bio: String!
+  technologyIds: [String!]
+  imageUrl: String
+}
+
+input UpdateAboutMeInput {
+  fullName: String
+  dob: String
+  startedCoding: String
+  bio: String
+  technologyIds: [String!]
+  imageUrl: String
+}
+
+input CreateSocialMediaInput {
+  name: String!
+  link: String!
+  icon: String!
+}
+
+input UpdateSocialMediaInput {
+  name: String
+  link: String
+  icon: String
+}
+
+input CreateMessageInput {
+  fullName: String!
+  email: String!
+  city: String!
+  subject: String!
+  messageDescription: String!
+}

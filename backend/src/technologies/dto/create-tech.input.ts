@@ -22,13 +22,4 @@ export class CreateTechInput {
   @Field(() => TechLevel)
   @IsEnum(TechLevel, { message: 'Level must be beginner, intermediate, or advanced' })
   level: TechLevel;
-} URL or icon name for displaying the technology
-  @Field()
-  @IsNotEmpty({ message: 'Icon is required' })
-  icon: string;
-
-  // Skill level for this technology
-  @Field(() => TechLevel)
-  @IsEnum(TechLevel, { message: 'Level must be beginner, intermediate, or advanced' })
-  level: TechLevel;
 }

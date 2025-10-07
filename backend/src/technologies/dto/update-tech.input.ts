@@ -25,11 +25,4 @@ export class UpdateTechInput {
   @IsOptional()
   @IsEnum(TechLevel, { message: 'Level must be beginner, intermediate, or advanced' })
   level?: TechLevel;
-}: string;
-
-  // Skill level (optional for updates)
-  @Field(() => TechLevel, { nullable: true })
-  @IsOptional()
-  @IsEnum(TechLevel, { message: 'Level must be beginner, intermediate, or advanced' })
-  level?: TechLevel;
 }

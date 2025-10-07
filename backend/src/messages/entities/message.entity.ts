@@ -17,7 +17,7 @@ import { ObjectType, Field, ID } from '@nestjs/graphql';
 export class Message extends Document {
   // MongoDB automatically creates _id, we expose it as id in GraphQL
   @Field(() => ID)
-  id: string;
+  declare id: string;
 
   // Sender's full name
   @Field()
@@ -78,7 +78,7 @@ export class Message extends Document {
     default: null,
     type: Date
   })
-  deletedAt: Date;
+  deletedAt: Date | null;
 
   // Message read status - helps track which messages have been viewed
   @Field()
@@ -89,12 +89,12 @@ export class Message extends Document {
   isRead: boolean;
 
   // When the message was marked as read
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @Prop({ 
     default: null,
     type: Date
   })
-  readAt: Date;
+  readAt: Date | null;
 
   // Automatically managed timestamps by Mongoose
   @Field(() => Date)

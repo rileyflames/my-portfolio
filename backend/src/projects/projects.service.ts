@@ -6,6 +6,8 @@ import { CreateProjectInput } from './dto/create-project.input';
 import { UpdateProjectInput } from './dto/update-project.input';
 import { TechnologiesService } from '../technologies/technologies.service';
 import { UserService } from '../users/user.service';
+import { Tech } from '../technologies/entities/tech.entity';
+import { User } from '../users/entities/user.entity';
 
 /**
  * ProjectsService handles all project-related business logic
@@ -67,7 +69,7 @@ export class ProjectsService {
     const creator = await this.userService.findOne(createProjectInput.createdById);
     
     // Load technologies if provided
-    let technologies = [];
+    let technologies: Tech[] = [];
     if (createProjectInput.technologyIds && createProjectInput.technologyIds.length > 0) {
       technologies = await this.technologiesService.findByIds(createProjectInput.technologyIds);
       
@@ -111,7 +113,7 @@ export class ProjectsService {
     const project = await this.findOne(id); // This will throw NotFoundException if not found
 
     // If editor is specified, verify they exist
-    let editor = null;
+    let editor: User | null = null;
     if (updateProjectInput.editedById) {
       editor = await this.userService.findOne(updateProjectInput.editedById);
     }

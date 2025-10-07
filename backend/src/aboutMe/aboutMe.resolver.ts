@@ -3,6 +3,9 @@ import { AboutMe } from './entities/aboutMe.entity';
 import { AboutMeService } from './aboutMe.service';
 import { CreateAboutMeInput } from './dto/create-aboutMe.input';
 import { UpdateAboutMeInput } from './dto/update-aboutMe.input';
+import { UploadService } from '../upload/upload.service';
+import type { FileUpload } from '../upload/upload.service';
+import { GraphQLUpload } from '../upload/scalars/upload.scalar';
 
 /**
  * AboutMeResolver handles GraphQL queries and mutations for personal information
@@ -11,7 +14,8 @@ import { UpdateAboutMeInput } from './dto/update-aboutMe.input';
 @Resolver(() => AboutMe)
 export class AboutMeResolver {
   constructor(
-    private readonly aboutMeService: AboutMeService
+    private readonly aboutMeService: AboutMeService,
+    private readonly uploadService: UploadService
   ) {}
 
   /**
@@ -85,5 +89,22 @@ export class AboutMeResolver {
   })
   async deleteAboutMe(): Promise<boolean> {
     return this.aboutMeService.remove();
+  }
+
+  /**
+   * GraphQL Mutation: Upload and set profile image
+   * Mutation: { uploadProfileImage(file: Upload!) }
+   */
+  @Mutation(() => AboutMe, {
+    description: 'Upload and set profile image for AboutMe'
+  })
+  async uploadAndSetProfileImage(
+    @Args('file', { type: () => GraphQLUpload }) file: FileUpload
+  ): Promise<AboutMe> {
+    // Upload the image
+    const imageUrl = await this.uploadService.uploadImage(file, 'profiles');
+    
+    // Update the AboutMe with the new image URL
+    return this.aboutMeService.update({ imageUrl });
   }
 }

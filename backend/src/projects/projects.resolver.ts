@@ -3,6 +3,9 @@ import { Projects } from './entities/project.entity';
 import { ProjectsService } from './projects.service';
 import { CreateProjectInput } from './dto/create-project.input';
 import { UpdateProjectInput } from './dto/update-project.input';
+import { UploadService } from '../upload/upload.service';
+import type { FileUpload } from '../upload/upload.service';
+import { GraphQLUpload } from '../upload/scalars/upload.scalar';
 
 /**
  * ProjectsResolver handles GraphQL queries and mutations for projects
@@ -11,7 +14,8 @@ import { UpdateProjectInput } from './dto/update-project.input';
 @Resolver(() => Projects)
 export class ProjectsResolver {
   constructor(
-    private readonly projectsService: ProjectsService
+    private readonly projectsService: ProjectsService,
+    private readonly uploadService: UploadService
   ) { }
 
   /**
@@ -138,5 +142,23 @@ export class ProjectsResolver {
   })
   async deleteProject(@Args('id') id: string): Promise<boolean> {
     return this.projectsService.remove(id);
+  }
+
+  /**
+   * GraphQL Mutation: Upload and set project image
+   * Mutation: { uploadProjectImage(projectId: "uuid", file: Upload!) }
+   */
+  @Mutation(() => Projects, {
+    description: 'Upload and set image for a project'
+  })
+  async uploadProjectImage(
+    @Args('projectId') projectId: string,
+    @Args('file', { type: () => GraphQLUpload }) file: FileUpload
+  ): Promise<Projects> {
+    // Upload the image
+    const imageUrl = await this.uploadService.uploadImage(file, 'projects');
+    
+    // Update the project with the new image URL
+    return this.projectsService.update(projectId, { imageUrl });
   }
 }

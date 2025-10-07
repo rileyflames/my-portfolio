@@ -4,6 +4,7 @@ import { AboutMe } from './entities/aboutMe.entity';
 import { AboutMeService } from './aboutMe.service';
 import { AboutMeResolver } from './aboutMe.resolver';
 import { TechnologiesModule } from '../technologies/technologies.module';
+import { UploadModule } from '../upload/upload.module';
 
 /**
  * AboutMe Module
@@ -17,6 +18,9 @@ import { TechnologiesModule } from '../technologies/technologies.module';
     
     // Import TechnologiesModule for managing personal tech skills
     TechnologiesModule,
+    
+    // Import UploadModule for image upload functionality
+    UploadModule,
   ],
   providers: [
     AboutMeService,  // Service containing business logic

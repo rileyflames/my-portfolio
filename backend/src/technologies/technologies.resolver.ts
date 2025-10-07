@@ -3,6 +3,9 @@ import { Tech } from './entities/tech.entity';
 import { TechnologiesService } from './technologies.service';
 import { CreateTechnologyInput } from './dto/create-technology.input';
 import { UpdateTechnologyInput } from './dto/update-technology.input';
+import { UploadService } from '../upload/upload.service';
+import type { FileUpload } from '../upload/upload.service';
+import { GraphQLUpload } from '../upload/scalars/upload.scalar';
 
 /**
  * TechnologiesResolver handles GraphQL queries and mutations for technologies
@@ -11,7 +14,8 @@ import { UpdateTechnologyInput } from './dto/update-technology.input';
 @Resolver(() => Tech)
 export class TechnologiesResolver {
   constructor(
-    private readonly technologiesService: TechnologiesService
+    private readonly technologiesService: TechnologiesService,
+    private readonly uploadService: UploadService
   ) {}
 
   /**
@@ -83,5 +87,23 @@ export class TechnologiesResolver {
   })
   async deleteTechnology(@Args('id') id: string): Promise<boolean> {
     return this.technologiesService.remove(id);
+  }
+
+  /**
+   * GraphQL Mutation: Upload and set technology icon
+   * Mutation: { uploadTechnologyIcon(technologyId: "uuid", file: Upload!) }
+   */
+  @Mutation(() => Tech, {
+    description: 'Upload and set icon for a technology'
+  })
+  async uploadTechnologyIcon(
+    @Args('technologyId') technologyId: string,
+    @Args('file', { type: () => GraphQLUpload }) file: FileUpload
+  ): Promise<Tech> {
+    // Upload the image
+    const iconUrl = await this.uploadService.uploadImage(file, 'technologies');
+    
+    // Update the technology with the new icon URL
+    return this.technologiesService.update(technologyId, { icon: iconUrl });
   }
 }

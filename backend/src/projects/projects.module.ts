@@ -5,6 +5,7 @@ import { ProjectsService } from './projects.service';
 import { ProjectsResolver } from './projects.resolver';
 import { TechnologiesModule } from '../technologies/technologies.module';
 import { UserModule } from '../users/user.module';
+import { UploadModule } from '../upload/upload.module';
 
 /**
  * Projects Module
@@ -19,6 +20,7 @@ import { UserModule } from '../users/user.module';
     // Import other modules we depend on
     TechnologiesModule, // For managing project technologies
     UserModule,         // For managing project creators/editors
+    UploadModule,       // For image upload functionality
   ],
   providers: [
     ProjectsService,  // Service containing business logic

@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { GraphQLModule } from '@nestjs/graphql'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
+import { GraphQLUpload } from './upload/scalars/upload.scalar';
 
 // DataBase Imports
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -19,6 +20,7 @@ import { ContributorsModule } from './contributors/contributors.module';
 import { AboutMeModule } from './aboutMe/aboutMe.module';
 import { SocialMediaModule } from './socialMedia/socialMedia.module';
 import { MessagesModule } from './messages/messages.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -31,7 +33,8 @@ import { MessagesModule } from './messages/messages.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver : ApolloDriver,
       autoSchemaFile : join(process.cwd(), 'src/schema.gql'),
-      playground : true
+      playground : true,
+      resolvers: { Upload: GraphQLUpload },
     }),
 
     // PostgreSQL TypeORM Configuration
@@ -75,6 +78,7 @@ import { MessagesModule } from './messages/messages.module';
     AboutMeModule,      // Personal information and bio
     SocialMediaModule,  // Social media links and profiles
     MessagesModule,     // Contact form messages with soft deletion
+    UploadModule,       // File upload functionality
     
   ],
   controllers: [],
