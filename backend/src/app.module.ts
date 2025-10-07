@@ -11,6 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 
 // App Parts will go here
+import { UserModule } from './users/user.module';
 
 @Module({
   imports: [
@@ -58,6 +59,8 @@ import { MongooseModule } from '@nestjs/mongoose';
     }),
 
     // all my other modules
+    UserModule,
+    
   ],
   controllers: [],
   providers: [],

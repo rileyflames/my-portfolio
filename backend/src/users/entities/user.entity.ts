@@ -1,44 +1,56 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm'
 import { Projects } from 'src/projects/entities/project.entity'
+import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql'
 
+export enum UserRole {
+    ADMIN = 'ADMIN',
+    EDITOR = 'EDITOR',
+}
+
+registerEnumType(UserRole, {
+    name: 'UserRole',
+})
+
+@ObjectType()
 @Entity('users')
 export class User {
-    // primary uuid id
+    @Field(() => ID)
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    // user's full name
+    @Field()
     @Column()
     name: string
 
-    // unique email
+    @Field()
     @Column({ unique: true })
     email: string
 
-    // role enum
+    @Field(() => UserRole)
     @Column({
         type: 'enum',
-        enum: ['ADMIN', 'EDITOR'],
-        default: 'EDITOR'
+        enum: UserRole,
+        default: UserRole.EDITOR
     })
-    role: 'ADMIN' | 'EDITOR'
+    role: UserRole
 
-    // password hash
+    @Field()
     @Column()
     password: string
 
-    // projects created by this user
+    @Field(() => [Projects], { nullable: true })
     @OneToMany(() => Projects, (project) => project.createdBy)
     createdProjects: Projects[]
 
-    // projects edited by this user
+    @Field(() => [Projects], { nullable: true })
     @OneToMany(() => Projects, (project) => project.editedBy)
     editedProjects: Projects[]
 
-    // timestamps
+    @Field(()=> Date)
     @CreateDateColumn()
     createdAt: Date
 
+    @Field(()=> Date)
     @UpdateDateColumn()
     updatedAt: Date
 }
