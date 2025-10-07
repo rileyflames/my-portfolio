@@ -12,6 +12,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 // App Parts will go here
 import { UserModule } from './users/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -60,6 +61,8 @@ import { UserModule } from './users/user.module';
 
     // all my other modules
     UserModule,
+
+    AuthModule,
     
   ],
   controllers: [],
