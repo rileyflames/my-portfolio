@@ -28,12 +28,15 @@ export class AboutMeService {
    */
   async getAboutMe(): Promise<AboutMe | null> {
     // Find the first (and should be only) AboutMe record
-    const aboutMe = await this.aboutMeRepository.findOne({
+    // Using find() with take: 1 instead of findOne() to avoid TypeORM "selection conditions" error
+    const results = await this.aboutMeRepository.find({
       relations: ['technologies', 'social'], // Load related technologies and social media
-      order: { createdAt: 'ASC' } // Get the oldest (first created) record
+      order: { createdAt: 'ASC' }, // Get the oldest (first created) record
+      take: 1 // Only get one record
     });
     
-    return aboutMe;
+    // Return the first result or null if no records exist
+    return results.length > 0 ? results[0] : null;
   }
 
   /**
