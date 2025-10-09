@@ -41,7 +41,7 @@ const ProjectForm = () => {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
+    reset: _reset,
     setValue
   } = useForm<ProjectFormData>({
     defaultValues: {
@@ -125,8 +125,10 @@ const ProjectForm = () => {
         progress: data.progress,
         imageUrl: data.imageUrl || null,
         description: data.description,
-        tags: tagsArray.length > 0 ? tagsArray : null,
-        technologyIds: data.technologyIds && data.technologyIds.length > 0 ? data.technologyIds : null,
+        // Use empty arrays instead of `null` for list fields to avoid runtime errors
+        // (backend and axios helper expect arrays; they may call `.length`).
+        tags: tagsArray.length > 0 ? tagsArray : [],
+        technologyIds: data.technologyIds && data.technologyIds.length > 0 ? data.technologyIds : [],
       }
 
       if (isEditMode) {

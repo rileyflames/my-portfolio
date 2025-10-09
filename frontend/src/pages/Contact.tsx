@@ -1,13 +1,10 @@
-// Contact page with form that sends messages to the backend
+// Contact page - The Odin Project Style
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { graphqlMutation } from '../lib/axios-client'
+import { Mail, MapPin, Send } from 'lucide-react'
 
-/**
- * TypeScript interface for form data
- * Matches the required fields from your Message entity
- */
 interface ContactFormData {
   fullName: string
   email: string
@@ -16,38 +13,24 @@ interface ContactFormData {
   messageDescription: string
 }
 
-/**
- * Contact Page Component
- * - Displays a contact form for visitors to send messages
- * - Uses React Hook Form for form validation and handling
- * - Will send data to backend via fetch API (REST endpoint)
- * - Shows success/error messages using toast notifications
- */
 const Contact = () => {
-  // State to track if form is being submitted
   const [isSubmitting, setIsSubmitting] = useState(false)
   
-  // React Hook Form setup with validation rules
   const {
-    register, // Function to register form inputs
-    handleSubmit, // Function to handle form submission
-    formState: { errors }, // Object containing validation errors
-    reset // Function to reset form after successful submission
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
   } = useForm<ContactFormData>()
   
-  /**
-   * Form submission handler
-   * @param data - Form data that matches ContactFormData interface
-   */
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true)
     
     try {
-      // Send data to backend using axios
-      const result = await graphqlMutation(
+      await graphqlMutation(
         `
           mutation CreateMessage($input: CreateMessageInput!) {
-            createMessage(createMessageInput: $input) {
+            createMessage(input: $input) {
               id
               fullName
               email
@@ -69,9 +52,8 @@ const Contact = () => {
         }
       )
       
-      console.log('Message sent successfully:', result)
       toast.success('Message sent successfully! I\'ll get back to you soon.')
-      reset() // Clear the form
+      reset()
       
     } catch (error) {
       console.error('Error sending message:', error)
@@ -82,181 +64,155 @@ const Contact = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-100 py-12 sm:py-16">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex-1 py-12 lg:py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Page header */}
-        <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 mb-4">
-            Get In Touch
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            Get in Touch
           </h1>
-          <p className="text-base sm:text-lg text-neutral-600 max-w-2xl mx-auto">
-            Have a project in mind or just want to say hello? 
-            I'd love to hear from you. Send me a message and I'll get back to you as soon as possible.
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Have a question or want to work together? I'd love to hear from you.
           </p>
         </div>
-        
-        {/* Contact form */}
-        <div className="bg-white rounded-xl border border-neutral-300 p-6 sm:p-8">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            
-            {/* Full Name field */}
-            <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name *
-              </label>
-              <input
-                type="text"
-                id="fullName"
-                {...register('fullName', { 
-                  required: 'Full name is required',
-                  minLength: { value: 2, message: 'Name must be at least 2 characters' },
-                  maxLength: { value: 100, message: 'Name must be less than 100 characters' }
-                })}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors ${
-                  errors.fullName ? 'border-red-500' : 'border-neutral-300'
-                }`}
-                placeholder="Enter your full name"
-              />
-              {/* Show validation error if exists */}
-              {errors.fullName && (
-                <p className="mt-1 text-sm text-red-600">{errors.fullName.message}</p>
-              )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Contact Info Cards */}
+          <div className="lg:col-span-1 space-y-6">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mb-4">
+                <Mail className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
+                Email Me
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Send me a message and I'll respond as soon as possible.
+              </p>
             </div>
-            
-            {/* Email field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address *
-              </label>
-              <input
-                type="email"
-                id="email"
-                {...register('email', { 
-                  required: 'Email is required',
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Please enter a valid email address'
-                  }
-                })}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors ${
-                  errors.email ? 'border-red-500' : 'border-neutral-300'
-                }`}
-                placeholder="Enter your email address"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-              )}
+
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mb-4">
+                <MapPin className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
+                Location
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Available for remote opportunities worldwide.
+              </p>
             </div>
-            
-            {/* City field */}
-            <div>
-              <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
-                City *
-              </label>
-              <input
-                type="text"
-                id="city"
-                {...register('city', { 
-                  required: 'City is required',
-                  minLength: { value: 2, message: 'City must be at least 2 characters' },
-                  maxLength: { value: 100, message: 'City must be less than 100 characters' }
-                })}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors ${
-                  errors.city ? 'border-red-500' : 'border-neutral-300'
-                }`}
-                placeholder="Enter your city"
-              />
-              {errors.city && (
-                <p className="mt-1 text-sm text-red-600">{errors.city.message}</p>
-              )}
+          </div>
+
+          {/* Contact Form */}
+          <div className="lg:col-span-2">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 shadow-sm">
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Name */}
+                  <div>
+                    <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Full Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="fullName"
+                      type="text"
+                      {...register('fullName', { required: 'Name is required', minLength: 2 })}
+                      className={`w-full px-4 py-3 border rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-600 dark:focus:ring-purple-400 focus:border-transparent ${errors.fullName ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'}`}
+                      placeholder="John Doe"
+                    />
+                    {errors.fullName && <p className="mt-1 text-sm text-red-500">{String(errors.fullName.message)}</p>}
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      {...register('email', { required: 'Email is required', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ })}
+                      className={`w-full px-4 py-3 border rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-600 dark:focus:ring-purple-400 focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'}`}
+                      placeholder="john@example.com"
+                    />
+                    {errors.email && <p className="mt-1 text-sm text-red-500">{String(errors.email.message)}</p>}
+                  </div>
+                </div>
+
+                {/* City */}
+                <div className="mt-6">
+                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    City <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="city"
+                    type="text"
+                    {...register('city', { required: 'City is required', minLength: 2 })}
+                    className={`w-full px-4 py-3 border rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-600 dark:focus:ring-purple-400 focus:border-transparent ${errors.city ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'}`}
+                    placeholder="New York"
+                  />
+                  {errors.city && <p className="mt-1 text-sm text-red-500">{String(errors.city.message)}</p>}
+                </div>
+
+                {/* Subject */}
+                <div className="mt-6">
+                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Subject <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="subject"
+                    type="text"
+                    {...register('subject', { required: 'Subject is required', minLength: 5 })}
+                    className={`w-full px-4 py-3 border rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-600 dark:focus:ring-purple-400 focus:border-transparent ${errors.subject ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'}`}
+                    placeholder="Project Inquiry"
+                  />
+                  {errors.subject && <p className="mt-1 text-sm text-red-500">{String(errors.subject.message)}</p>}
+                </div>
+
+                {/* Message */}
+                <div className="mt-6">
+                  <label htmlFor="messageDescription" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Message <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    id="messageDescription"
+                    rows={6}
+                    {...register('messageDescription', { required: 'Message is required', minLength: 10 })}
+                    className={`w-full px-4 py-3 border rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-600 dark:focus:ring-purple-400 focus:border-transparent resize-y ${errors.messageDescription ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'}`}
+                    placeholder="Tell me about your project..."
+                  />
+                  {errors.messageDescription && <p className="mt-1 text-sm text-red-500">{String(errors.messageDescription.message)}</p>}
+                </div>
+
+                {/* Submit Button */}
+                <div className="mt-6">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`w-full sm:w-auto px-8 py-4 rounded-lg text-white font-semibold transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-2 ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600'}`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5" />
+                        Send Message
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+                  Fields marked with <span className="text-red-500">*</span> are required.
+                </p>
+              </form>
             </div>
-            
-            {/* Subject field */}
-            <div>
-              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                Subject *
-              </label>
-              <input
-                type="text"
-                id="subject"
-                {...register('subject', { 
-                  required: 'Subject is required',
-                  minLength: { value: 5, message: 'Subject must be at least 5 characters' },
-                  maxLength: { value: 200, message: 'Subject must be less than 200 characters' }
-                })}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors ${
-                  errors.subject ? 'border-red-500' : 'border-neutral-300'
-                }`}
-                placeholder="What's this about?"
-              />
-              {errors.subject && (
-                <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
-              )}
-            </div>
-            
-            {/* Message Description field */}
-            <div>
-              <label htmlFor="messageDescription" className="block text-sm font-medium text-gray-700 mb-2">
-                Message *
-              </label>
-              <textarea
-                id="messageDescription"
-                rows={6}
-                {...register('messageDescription', { 
-                  required: 'Message is required',
-                  minLength: { value: 10, message: 'Message must be at least 10 characters' },
-                  maxLength: { value: 2000, message: 'Message must be less than 2000 characters' }
-                })}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors resize-vertical ${
-                  errors.messageDescription ? 'border-red-500' : 'border-neutral-300'
-                }`}
-                placeholder="Tell me about your project, question, or just say hello..."
-              />
-              {errors.messageDescription && (
-                <p className="mt-1 text-sm text-red-600">{errors.messageDescription.message}</p>
-              )}
-            </div>
-            
-            {/* Submit button */}
-            <div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`w-full py-3 sm:py-4 px-6 rounded-lg text-white font-semibold text-base sm:text-lg transition-all duration-200 ${
-                  isSubmitting 
-                    ? 'bg-neutral-400 cursor-not-allowed' 
-                    : 'bg-primary hover:bg-primary-light hover:transform hover:scale-105 shadow-lg'
-                }`}
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Sending Message...
-                  </span>
-                ) : (
-                  'Send Message'
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-        
-        {/* Additional contact information */}
-        <div className="mt-8 sm:mt-12 text-center">
-          <p className="text-neutral-600 mb-4 text-sm sm:text-base">
-            Prefer a different way to connect?
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-6">
-            {/* You can add actual contact links here */}
-            <span className="text-primary font-medium">anthony@example.com</span>
-            <span className="hidden sm:inline text-neutral-400">|</span>
-            <span className="text-primary font-medium">LinkedIn</span>
-            <span className="hidden sm:inline text-neutral-400">|</span>
-            <span className="text-primary font-medium">GitHub</span>
           </div>
         </div>
       </div>

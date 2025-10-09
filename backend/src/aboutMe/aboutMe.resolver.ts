@@ -1,11 +1,11 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AboutMe } from './entities/aboutMe.entity';
 import { AboutMeService } from './aboutMe.service';
 import { CreateAboutMeInput } from './dto/create-aboutMe.input';
 import { UpdateAboutMeInput } from './dto/update-aboutMe.input';
-import { UploadService } from '../upload/upload.service';
-import type { FileUpload } from '../upload/upload.service';
-import { GraphQLUpload } from '../upload/scalars/upload.scalar';
+import { Image } from '../images/entities/image.entity';
 
 /**
  * AboutMeResolver handles GraphQL queries and mutations for personal information
@@ -14,8 +14,7 @@ import { GraphQLUpload } from '../upload/scalars/upload.scalar';
 @Resolver(() => AboutMe)
 export class AboutMeResolver {
   constructor(
-    private readonly aboutMeService: AboutMeService,
-    private readonly uploadService: UploadService
+    private readonly aboutMeService: AboutMeService
   ) {}
 
   /**
@@ -92,19 +91,26 @@ export class AboutMeResolver {
   }
 
   /**
-   * GraphQL Mutation: Upload and set profile image
-   * Mutation: { uploadProfileImage(file: Upload!) }
+   * GraphQL Query: Get profile image
+   * Query: { profileImage { id url public_id filename alt_text } }
+   */
+  @Query(() => Image, {
+    name: 'profileImage',
+    description: 'Get the profile image for AboutMe',
+    nullable: true
+  })
+  async getProfileImage(): Promise<Image | null> {
+    return this.aboutMeService.getProfileImage();
+  }
+
+  /**
+   * GraphQL Mutation: Delete profile image
+   * Mutation: { deleteProfileImage { id fullName imageUrl } }
    */
   @Mutation(() => AboutMe, {
-    description: 'Upload and set profile image for AboutMe'
+    description: 'Delete profile image from AboutMe and Cloudinary'
   })
-  async uploadAndSetProfileImage(
-    @Args('file', { type: () => GraphQLUpload }) file: FileUpload
-  ): Promise<AboutMe> {
-    // Upload the image
-    const imageUrl = await this.uploadService.uploadImage(file, 'profiles');
-    
-    // Update the AboutMe with the new image URL
-    return this.aboutMeService.update({ imageUrl });
+  async deleteProfileImage(): Promise<AboutMe> {
+    return this.aboutMeService.deleteProfileImage();
   }
 }

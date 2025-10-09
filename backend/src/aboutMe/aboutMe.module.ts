@@ -3,8 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AboutMe } from './entities/aboutMe.entity';
 import { AboutMeService } from './aboutMe.service';
 import { AboutMeResolver } from './aboutMe.resolver';
-import { TechnologiesModule } from '../technologies/technologies.module';
-import { UploadModule } from '../upload/upload.module';
+import { AboutMeController } from './aboutMe.controller';
+import { SkillsModule } from '../skills/skills.module';
+import { ImagesModule } from '../images/images.module';
 
 /**
  * AboutMe Module
@@ -16,11 +17,14 @@ import { UploadModule } from '../upload/upload.module';
     // Import the AboutMe entity for TypeORM
     TypeOrmModule.forFeature([AboutMe]),
     
-    // Import TechnologiesModule for managing personal tech skills
-    TechnologiesModule,
+    // Import SkillsModule for managing personal skills
+    SkillsModule,
     
-    // Import UploadModule for image upload functionality
-    UploadModule,
+    // Import ImagesModule for image management with Cloudinary
+    ImagesModule,
+  ],
+  controllers: [
+    AboutMeController  // REST controller for file uploads
   ],
   providers: [
     AboutMeService,  // Service containing business logic

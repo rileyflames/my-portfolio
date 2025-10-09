@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  /* Purple color palette */
+  --color-purple-50: #faf5ff;
+  --color-purple-100: #f3e8ff;
+  --color-purple-200: #e9d5ff;
+  --color-purple-300: #d8b4fe;
+  --color-purple-400: #c084fc;
+  --color-purple-500: #a855f7;
+  --color-purple-600: #3B0270;
+  --color-purple-700: #7e22ce;
+  --color-purple-800: #6b21a8;
+  --color-purple-900: #581c87;
+  
+  /* Font families */
+  --font-sans: 'Open Sans', sans-serif;
+  --font-montserrat: 'Montserrat', sans-serif;
+  --font-open-sans: 'Open Sans', sans-serif;
+  --font-monaco: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
+}
+
+/* Dark mode variant - Tailwind v4 syntax */
+@variant dark (.dark &);

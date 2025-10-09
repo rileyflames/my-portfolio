@@ -1,13 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Projects } from './entities/project.entity';
 import { CreateProjectInput } from './dto/create-project.input';
 import { UpdateProjectInput } from './dto/update-project.input';
-import { TechnologiesService } from '../technologies/technologies.service';
+import { SkillsService } from '../skills/skills.service';
 import { UserService } from '../users/user.service';
-import { Tech } from '../technologies/entities/tech.entity';
+import { Skill } from '../skills/entities/skill.entity';
 import { User } from '../users/entities/user.entity';
+import { ImagesService } from '../images/images.service';
+import { Image } from '../images/entities/image.entity';
+import { ContributorsService } from '../contributors/contributors.service';
+import { Contributors } from '../contributors/entities/contributors.entity';
 
 /**
  * ProjectsService handles all project-related business logic
@@ -21,8 +25,10 @@ export class ProjectsService {
     private readonly projectsRepository: Repository<Projects>,
     
     // Inject other services we depend on
-    private readonly technologiesService: TechnologiesService,
+    private readonly skillsService: SkillsService,
     private readonly userService: UserService,
+    private readonly imagesService: ImagesService,
+    private readonly contributorsService: ContributorsService,
   ) {}
 
   /**
@@ -68,14 +74,25 @@ export class ProjectsService {
     // Verify that the creator exists
     const creator = await this.userService.findOne(createProjectInput.createdById);
     
-    // Load technologies if provided
-    let technologies: Tech[] = [];
+    // Load skills if provided
+    let technologies: Skill[] = [];
     if (createProjectInput.technologyIds && createProjectInput.technologyIds.length > 0) {
-      technologies = await this.technologiesService.findByIds(createProjectInput.technologyIds);
+      technologies = await this.skillsService.findByIds(createProjectInput.technologyIds);
       
       // Check if all requested technologies were found
       if (technologies.length !== createProjectInput.technologyIds.length) {
         throw new NotFoundException('One or more technologies not found');
+      }
+    }
+
+    // Load contributors if provided
+    let contributors: Contributors[] = [];
+    if (createProjectInput.contributorIds && createProjectInput.contributorIds.length > 0) {
+      contributors = await this.contributorsService.findByIds(createProjectInput.contributorIds);
+      
+      // Check if all requested contributors were found
+      if (contributors.length !== createProjectInput.contributorIds.length) {
+        throw new NotFoundException('One or more contributors not found');
       }
     }
 
@@ -86,12 +103,13 @@ export class ProjectsService {
       liveUrl: createProjectInput.liveUrl,
       progress: createProjectInput.progress,
       imageUrl: createProjectInput.imageUrl,
+      images: createProjectInput.images, // Handle images array
       description: createProjectInput.description,
       technologyIds: createProjectInput.technologyIds,
       tags: createProjectInput.tags,
       createdBy: creator,
       technologies: technologies,
-      // Note: contributors will be handled separately if needed
+      contributors: contributors,
     });
 
     // Save the project to the database
@@ -121,15 +139,33 @@ export class ProjectsService {
     // Load new technologies if provided
     let technologies = project.technologies; // Keep existing technologies by default
     if (updateProjectInput.technologyIds !== undefined) {
-      if (updateProjectInput.technologyIds.length > 0) {
-        technologies = await this.technologiesService.findByIds(updateProjectInput.technologyIds);
-        
+      // Normalize null to empty array to avoid runtime errors when checking .length
+      const ids = updateProjectInput.technologyIds ?? []
+      if (ids.length > 0) {
+        technologies = await this.skillsService.findByIds(ids);
+
         // Check if all requested technologies were found
-        if (technologies.length !== updateProjectInput.technologyIds.length) {
+        if (technologies.length !== ids.length) {
           throw new NotFoundException('One or more technologies not found');
         }
       } else {
-        technologies = []; // Clear technologies if empty array provided
+        technologies = []; // Clear technologies if empty array or null provided
+      }
+    }
+
+    // Load new contributors if provided
+    let contributors = project.contributors; // Keep existing contributors by default
+    if (updateProjectInput.contributorIds !== undefined) {
+      const ids = updateProjectInput.contributorIds ?? []
+      if (ids.length > 0) {
+        contributors = await this.contributorsService.findByIds(ids);
+
+        // Check if all requested contributors were found
+        if (contributors.length !== ids.length) {
+          throw new NotFoundException('One or more contributors not found');
+        }
+      } else {
+        contributors = []; // Clear contributors if empty array or null provided
       }
     }
 
@@ -140,10 +176,12 @@ export class ProjectsService {
       liveUrl: updateProjectInput.liveUrl ?? project.liveUrl,
       progress: updateProjectInput.progress ?? project.progress,
       imageUrl: updateProjectInput.imageUrl ?? project.imageUrl,
+      images: updateProjectInput.images ?? project.images, // Handle images array
       description: updateProjectInput.description ?? project.description,
       technologyIds: updateProjectInput.technologyIds ?? project.technologyIds,
       tags: updateProjectInput.tags ?? project.tags,
       technologies: technologies,
+      contributors: contributors,
       editedBy: editor ?? project.editedBy,
     });
 
@@ -195,5 +233,82 @@ export class ProjectsService {
       relations: ['technologies', 'contributors', 'createdBy', 'editedBy'],
       order: { createdAt: 'DESC' }
     });
+  }
+
+  /**
+   * Upload images to a project (up to 10 total)
+   * @param projectId - The project ID
+   * @param files - Array of uploaded files
+   * @returns Promise<Projects> - Updated project with new images
+   */
+  async uploadProjectImages(projectId: string, files: Express.Multer.File[]): Promise<Projects> {
+    const project = await this.findOne(projectId);
+
+    // Get existing images for this project
+    const existingImages = await this.imagesService.findImages({ projectId });
+    const currentImageCount = existingImages.data.length;
+
+    // Check if adding new images would exceed the limit
+    if (currentImageCount + files.length > 10) {
+      throw new BadRequestException(
+        `Cannot upload ${files.length} images. Project already has ${currentImageCount} images. Maximum is 10.`
+      );
+    }
+
+    // Upload all images
+    const uploadedImages: Image[] = [];
+    for (const file of files) {
+      const image = await this.imagesService.uploadImage(file, {
+        project_id: projectId,
+        alt_text: `${project.name} project image`,
+      });
+      uploadedImages.push(image);
+    }
+
+    // Update project's images array with all image URLs
+    const allImages = await this.imagesService.findImages({ projectId });
+    project.images = allImages.data.map(img => img.url);
+    await this.projectsRepository.save(project);
+
+    return this.findOne(projectId);
+  }
+
+  /**
+   * Delete a specific image from a project
+   * @param projectId - The project ID
+   * @param imageId - The image ID to delete
+   * @returns Promise<Projects> - Updated project without the deleted image
+   */
+  async deleteProjectImage(projectId: string, imageId: string): Promise<Projects> {
+    const project = await this.findOne(projectId);
+
+    // Verify the image belongs to this project
+    const image = await this.imagesService.findImages({ projectId });
+    const imageToDelete = image.data.find(img => img.id === imageId);
+
+    if (!imageToDelete) {
+      throw new NotFoundException(`Image with ID ${imageId} not found for this project`);
+    }
+
+    // Delete the image (from both Cloudinary and database)
+    await this.imagesService.deleteImage(imageId);
+
+    // Update project's images array
+    const remainingImages = await this.imagesService.findImages({ projectId });
+    project.images = remainingImages.data.map(img => img.url);
+    await this.projectsRepository.save(project);
+
+    return this.findOne(projectId);
+  }
+
+  /**
+   * Get all images for a project
+   * @param projectId - The project ID
+   * @returns Promise<Image[]> - Array of images for the project
+   */
+  async getProjectImages(projectId: string): Promise<Image[]> {
+    await this.findOne(projectId); // Verify project exists
+    const result = await this.imagesService.findImages({ projectId });
+    return result.data;
   }
 }

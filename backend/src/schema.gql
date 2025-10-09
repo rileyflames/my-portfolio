@@ -2,20 +2,31 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Tech {
+type Skill {
   id: ID!
   name: String!
   icon: String!
-  level: TechLevel!
+  level: SkillLevel!
+  category: SkillCategory!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
 """Skill level for a technology"""
-enum TechLevel {
+enum SkillLevel {
   BEGINNER
   INTERMEDIATE
   ADVANCED
+}
+
+"""Category of skill"""
+enum SkillCategory {
+  LANGUAGES
+  FRAMEWORKS
+  DEVOPS
+  DATABASES
+  TOOLS
+  UI_DESIGN
 }
 
 """
@@ -38,8 +49,9 @@ type Projects {
   liveUrl: String
   progress: String!
   imageUrl: String
+  images: [String!]
   description: String!
-  technologies: [Tech!]!
+  technologies: [Skill!]!
   technologyIds: [String!]
   tags: [String!]
   contributors: [Contributors!]
@@ -71,6 +83,18 @@ type LoginResponse {
   user: User!
 }
 
+type Image {
+  id: ID!
+  public_id: String!
+  url: String!
+  filename: String!
+  alt_text: String
+  owner_id: String
+  project_id: String
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
 type SocialMedia {
   id: ID!
   name: String!
@@ -87,7 +111,7 @@ type AboutMe {
   dob: String!
   startedCoding: String!
   bio: String!
-  technologies: [Tech!]!
+  technologies: [Skill!]!
   social: [SocialMedia!]!
   imageUrl: String
   createdAt: DateTime!
@@ -118,11 +142,11 @@ type Query {
   users: [User!]!
   user(id: String!): User
 
-  """Get all technologies/skills"""
-  technologies: [Tech!]!
+  """Get all skills"""
+  technologies: [Skill!]!
 
-  """Get a single technology by ID"""
-  technology(id: String!): Tech
+  """Get a single skill by ID"""
+  technology(id: String!): Skill
 
   """Get all projects with their technologies and creators"""
   projects: [Projects!]!
@@ -136,6 +160,9 @@ type Query {
   """Get projects filtered by progress status"""
   projectsByProgress(progress: String!): [Projects!]!
 
+  """Get all images for a specific project"""
+  projectImages(projectId: String!): [Image!]!
+
   """Get all contributors with their projects"""
   contributors: [Contributors!]!
 
@@ -144,6 +171,9 @@ type Query {
 
   """Get personal information and bio"""
   aboutMe: AboutMe
+
+  """Get the profile image for AboutMe"""
+  profileImage: Image
 
   """Get all social media links"""
   socialMediaLinks: [SocialMedia!]!
@@ -180,13 +210,13 @@ type Mutation {
   deleteUser(id: String!): Boolean!
   login(input: LoginInput!): LoginResponse!
 
-  """Create a new technology/skill"""
-  createTechnology(input: CreateTechnologyInput!): Tech!
+  """Create a new skill"""
+  createTechnology(input: CreateSkillInput!): Skill!
 
-  """Update an existing technology/skill"""
-  updateTechnology(id: String!, input: UpdateTechnologyInput!): Tech!
+  """Update an existing skill"""
+  updateTechnology(id: String!, input: UpdateSkillInput!): Skill!
 
-  """Delete a technology/skill"""
+  """Delete a skill"""
   deleteTechnology(id: String!): Boolean!
 
   """Upload an icon for a technology"""
@@ -195,20 +225,23 @@ type Mutation {
   """Upload a profile image for AboutMe"""
   uploadProfileImage(file: Upload!): String!
 
-  """Upload and set image for a project"""
-  uploadProjectImage(projectId: String!, file: Upload!): Projects!
+  """Upload an image for a project"""
+  uploadProjectImage(file: Upload!): String!
 
   """Upload a general image file"""
   uploadImage(file: Upload!, folder: String): String!
 
-  """Create a new project"""
+  """Create a new project (ADMIN only)"""
   createProject(input: CreateProjectInput!): Projects!
 
-  """Update an existing project"""
+  """Update an existing project (ADMIN only)"""
   updateProject(id: String!, input: UpdateProjectInput!): Projects!
 
-  """Delete a project"""
+  """Delete a project (ADMIN only)"""
   deleteProject(id: String!): Boolean!
+
+  """Delete a specific image from a project (ADMIN only)"""
+  deleteProjectImage(projectId: String!, imageId: String!): Projects!
 
   """Create a new contributor"""
   createContributor(input: CreateContributorInput!): Contributors!
@@ -228,8 +261,8 @@ type Mutation {
   """Delete personal information"""
   deleteAboutMe: Boolean!
 
-  """Upload and set profile image for AboutMe"""
-  uploadAndSetProfileImage(file: Upload!): AboutMe!
+  """Delete profile image from AboutMe and Cloudinary"""
+  deleteProfileImage: AboutMe!
 
   """Create a new social media link"""
   createSocialMediaLink(input: CreateSocialMediaInput!): SocialMedia!
@@ -278,16 +311,18 @@ input LoginInput {
   password: String!
 }
 
-input CreateTechnologyInput {
+input CreateSkillInput {
   name: String!
   icon: String!
-  level: TechLevel!
+  level: SkillLevel!
+  category: SkillCategory!
 }
 
-input UpdateTechnologyInput {
+input UpdateSkillInput {
   name: String
   icon: String
-  level: TechLevel
+  level: SkillLevel
+  category: SkillCategory
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -299,6 +334,7 @@ input CreateProjectInput {
   liveUrl: String
   progress: String!
   imageUrl: String
+  images: [String!]
   description: String!
   technologyIds: [String!]
   tags: [String!]
@@ -312,6 +348,7 @@ input UpdateProjectInput {
   liveUrl: String
   progress: String
   imageUrl: String
+  images: [String!]
   description: String
   technologyIds: [String!]
   tags: [String!]

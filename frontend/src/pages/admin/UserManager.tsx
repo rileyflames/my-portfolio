@@ -164,14 +164,14 @@ const UserManager = () => {
    */
   const getRoleBadge = (role: string) => {
     return role === 'ADMIN' 
-      ? 'bg-purple-100 text-purple-800' 
-      : 'bg-blue-100 text-blue-800'
+      ? 'bg-purple-600/30 text-purple-200 border border-purple-400/30' 
+      : 'bg-blue-600/30 text-blue-200 border border-blue-400/30'
   }
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 dark:border-purple-400"></div>
       </div>
     )
   }
@@ -181,15 +181,15 @@ const UserManager = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
-          <p className="text-gray-600">Manage user accounts and permissions</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">User Management</h2>
+          <p className="text-gray-600 dark:text-gray-400">Manage user accounts and permissions</p>
         </div>
         <button
           onClick={() => {
             setShowForm(true)
             reset({ name: '', email: '', password: '', confirmPassword: '', role: 'EDITOR' })
           }}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="px-4 py-2 bg-purple-600 dark:bg-purple-500 text-white rounded-lg hover:bg-purple-700 dark:hover:bg-purple-600 transition-all"
         >
           + Add User
         </button>
@@ -197,8 +197,8 @@ const UserManager = () => {
 
       {/* Create User Form */}
       {showForm && (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold mb-4">Create New User</h3>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-6">
+          <h3 className="text-lg font-semibold text-white mb-4">Create New User</h3>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             
             {/* Name Field */}
@@ -340,44 +340,44 @@ const UserManager = () => {
       )}
 
       {/* Users Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Created
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
+                <tr key={user.id} className="hover:bg-gray-50 dark:bg-gray-900 transition-colors">
                   {/* User Info */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                      <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-purple-800 rounded-full flex items-center justify-center shadow-lg">
                         <span className="text-white font-medium">
                           {user.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {user.name}
                           {user.id === currentUser?.id && (
-                            <span className="ml-2 text-xs text-gray-500">(You)</span>
+                            <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">(You)</span>
                           )}
                         </div>
                       </div>
@@ -386,7 +386,7 @@ const UserManager = () => {
 
                   {/* Email */}
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{user.email}</div>
+                    <div className="text-sm text-gray-700 dark:text-gray-300">{user.email}</div>
                   </td>
 
                   {/* Role Badge */}
@@ -397,7 +397,7 @@ const UserManager = () => {
                   </td>
 
                   {/* Created Date */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
 
@@ -406,12 +406,12 @@ const UserManager = () => {
                     {user.id !== currentUser?.id ? (
                       <button
                         onClick={() => handleDelete(user.id, user.name)}
-                        className="text-red-600 hover:text-red-900"
+                        className="text-red-400 hover:text-red-300 transition-colors"
                       >
                         Delete
                       </button>
                     ) : (
-                      <span className="text-gray-400">-</span>
+                      <span className="text-gray-400 dark:text-gray-600">-</span>
                     )}
                   </td>
                 </tr>
@@ -423,19 +423,19 @@ const UserManager = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <div className="text-sm text-gray-600">Total Users</div>
-          <div className="text-2xl font-bold text-gray-900">{users.length}</div>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-4">
+          <div className="text-sm text-gray-500 dark:text-gray-400">Total Users</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{users.length}</div>
         </div>
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <div className="text-sm text-gray-600">Admins</div>
-          <div className="text-2xl font-bold text-purple-600">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-4">
+          <div className="text-sm text-gray-500 dark:text-gray-400">Admins</div>
+          <div className="text-2xl font-bold text-purple-400">
             {users.filter(u => u.role === 'ADMIN').length}
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <div className="text-sm text-gray-600">Editors</div>
-          <div className="text-2xl font-bold text-blue-600">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-4">
+          <div className="text-sm text-gray-500 dark:text-gray-400">Editors</div>
+          <div className="text-2xl font-bold text-blue-400">
             {users.filter(u => u.role === 'EDITOR').length}
           </div>
         </div>

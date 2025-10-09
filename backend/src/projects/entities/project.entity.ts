@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable, ManyToOne, JoinColumn } from 'typeorm'
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { User } from 'src/users/entities/user.entity'
-import { Tech } from 'src/technologies/entities/tech.entity'
+import { Skill } from 'src/skills/entities/skill.entity'
 import { Contributors } from 'src/contributors/entities/contributors.entity'
 
 
@@ -37,21 +37,26 @@ export class Projects {
     })
     progress: 'pending' | 'in-progress' | 'finished'
 
-    // optional image url
+    // optional image url (main/featured image)
     @Field({ nullable: true })
     @Column({ nullable: true })
     imageUrl?: string
+
+    // multiple project images (gallery)
+    @Field(() => [String], { nullable: true })
+    @Column('simple-array', { nullable: true })
+    images?: string[]
 
     // description text
     @Field()
     @Column('text')
     description: string
 
-    // technologies relation (many-to-many)
-    @Field(() => [Tech])
-    @ManyToMany(() => Tech, { eager: true })
+    // skills relation (many-to-many)
+    @Field(() => [Skill])
+    @ManyToMany(() => Skill, { eager: true })
     @JoinTable()
-    technologies: Tech[]
+    technologies: Skill[]
 
     // conveniences: array of technology ids (simple-array). Optional.
     // Keep in sync with the relation if you need only ids in some responses.

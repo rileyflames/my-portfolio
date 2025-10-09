@@ -105,6 +105,21 @@ const ImageUpload = ({
     setUploadProgress(0)
 
     try {
+      // Fetch Cloudinary config from backend
+      const configResponse = await fetch('http://localhost:3000/cloudinary/config')
+      if (!configResponse.ok) {
+        throw new Error('Failed to fetch Cloudinary configuration')
+      }
+      const config = await configResponse.json()
+      const { cloudName, uploadPreset } = config
+
+      if (!cloudName || !uploadPreset) {
+        toast.error('Cloudinary is not configured on the server.')
+        console.error('Missing cloudName or uploadPreset from backend')
+        setIsUploading(false)
+        return
+      }
+
       const uploadedUrls: string[] = []
 
       // Upload each file
@@ -120,12 +135,12 @@ const ImageUpload = ({
         // Create FormData for file upload
         const formData = new FormData()
         formData.append('file', file)
-        formData.append('upload_preset', 'your_upload_preset') // Replace with your Cloudinary preset
+        formData.append('upload_preset', uploadPreset)
+        formData.append('folder', 'portfolio') // Organize uploads in a folder
         
         // Upload to Cloudinary
-        // Note: In production, you should upload through your backend for security
         const response = await fetch(
-          'https://api.cloudinary.com/v1_1/your_cloud_name/image/upload', // Replace with your cloud name
+          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
           {
             method: 'POST',
             body: formData

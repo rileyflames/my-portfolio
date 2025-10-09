@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config'
 
 // GraphQL imports
@@ -11,16 +11,25 @@ import { GraphQLUpload } from './upload/scalars/upload.scalar';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 
+// Rate limiting
+import { ThrottlerModule } from '@nestjs/throttler';
+
+// Security
+import { SecurityModule } from './security/security.module';
+import { SecurityHeadersMiddleware } from './security/security-headers.middleware';
+
 // Import all application modules
 import { UserModule } from './users/user.module';
 import { AuthModule } from './auth/auth.module';
-import { TechnologiesModule } from './technologies/technologies.module';
+import { SkillsModule } from './skills/skills.module';
 import { ProjectsModule } from './projects/projects.module';
 import { ContributorsModule } from './contributors/contributors.module';
 import { AboutMeModule } from './aboutMe/aboutMe.module';
 import { SocialMediaModule } from './socialMedia/socialMedia.module';
 import { MessagesModule } from './messages/messages.module';
 import { UploadModule } from './upload/upload.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { ImagesModule } from './images/images.module';
 
 @Module({
   imports: [
@@ -29,12 +38,31 @@ import { UploadModule } from './upload/upload.module';
       isGlobal : true
     }),
 
+    /**
+     * Rate Limiting Configuration
+     * 
+     * PURPOSE: Prevents brute-force attacks on login endpoint
+     * 
+     * SETTINGS:
+     * - ttl: Time window in milliseconds (60000ms = 60 seconds)
+     * - limit: Maximum requests allowed per time window (5 requests)
+     * 
+     * EXAMPLE: If someone tries to login 5 times in 60 seconds,
+     * they'll get a 429 Too Many Requests error and must wait
+     */
+    ThrottlerModule.forRoot([{
+      ttl: 60000, // 60 seconds
+      limit: 5,   // 5 requests per 60 seconds
+    }]),
+
     // GraphQL
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver : ApolloDriver,
       autoSchemaFile : join(process.cwd(), 'src/schema.gql'),
       playground : true,
       resolvers: { Upload: GraphQLUpload },
+      // Add context to include request/response for guards
+      context: ({ req, res }) => ({ req, res }),
     }),
 
     // PostgreSQL TypeORM Configuration
@@ -55,8 +83,8 @@ import { UploadModule } from './upload/upload.module';
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
 
         // Auto-create/update database tables based on entities
-        // WARNING: Set to false in production to prevent data loss
-        synchronize: true, // true for development, false for production
+        // WARNING: Set to false in production
+        synchronize: true, // Let TypeORM handle schema updates
       }),
     }),
 
@@ -69,19 +97,34 @@ import { UploadModule } from './upload/upload.module';
       }),
     }),
 
+    // Security module
+    SecurityModule,     // Input sanitization and security utilities
+    
     // All application modules
     UserModule,         // User management and authentication
     AuthModule,         // JWT authentication and login
-    TechnologiesModule, // Technology/skills management
+    SkillsModule,       // Skills management
     ProjectsModule,     // Portfolio projects management
     ContributorsModule, // Project contributors management
     AboutMeModule,      // Personal information and bio
     SocialMediaModule,  // Social media links and profiles
     MessagesModule,     // Contact form messages with soft deletion
     UploadModule,       // File upload functionality
+    CloudinaryModule,   // Cloudinary image upload configuration
+    ImagesModule,       // Image management with Cloudinary + Postgres
     
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  /**
+   * Configure middleware
+   * Apply security headers to all routes
+   */
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(SecurityHeadersMiddleware)
+      .forRoutes('*'); // Apply to all routes
+  }
+}

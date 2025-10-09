@@ -1,21 +1,29 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 import { Projects } from './entities/project.entity';
 import { ProjectsService } from './projects.service';
 import { CreateProjectInput } from './dto/create-project.input';
 import { UpdateProjectInput } from './dto/update-project.input';
-import { UploadService } from '../upload/upload.service';
-import type { FileUpload } from '../upload/upload.service';
-import { GraphQLUpload } from '../upload/scalars/upload.scalar';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../users/entities/user.entity';
+import { Image } from '../images/entities/image.entity';
 
 /**
  * ProjectsResolver handles GraphQL queries and mutations for projects
- * This is the entry point for all project-related GraphQL operations
+ * 
+ * SECURITY MODEL:
+ * - Public queries: Anyone can view projects (no authentication required)
+ * - Admin mutations: Only authenticated ADMIN users can create/update/delete
+ * 
+ * This ensures your portfolio is publicly viewable while keeping
+ * content management restricted to authorized users only
  */
 @Resolver(() => Projects)
 export class ProjectsResolver {
   constructor(
-    private readonly projectsService: ProjectsService,
-    private readonly uploadService: UploadService
+    private readonly projectsService: ProjectsService
   ) { }
 
   /**
@@ -89,21 +97,17 @@ export class ProjectsResolver {
 
   /**
    * GraphQL Mutation: Create a new project
-   * Mutation: { 
-   *   createProject(input: { 
-   *     name: "My App", 
-   *     githubLink: "https://github.com/user/repo",
-   *     description: "A cool app",
-   *     progress: "in-progress",
-   *     createdById: "user-uuid",
-   *     technologyIds: ["tech-uuid-1", "tech-uuid-2"]
-   *   }) {
-   *     id name technologies { name }
-   *   }
-   * }
+   * 
+   * SECURITY: Requires authentication + ADMIN role
+   * - User must have valid JWT token
+   * - User must have ADMIN role
+   * - Returns 401 if not authenticated
+   * - Returns 403 if not ADMIN
    */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Mutation(() => Projects, {
-    description: 'Create a new project'
+    description: 'Create a new project (ADMIN only)'
   })
   async createProject(
     @Args('input') createProjectInput: CreateProjectInput
@@ -113,18 +117,14 @@ export class ProjectsResolver {
 
   /**
    * GraphQL Mutation: Update an existing project
-   * Mutation: {
-   *   updateProject(id: "uuid", input: { 
-   *     progress: "finished",
-   *     liveUrl: "https://myapp.com",
-   *     editedById: "editor-uuid"
-   *   }) {
-   *     id name progress liveUrl editedBy { name }
-   *   }
-   * }
+   * 
+   * SECURITY: Requires authentication + ADMIN role
+   * Only authenticated admins can modify projects
    */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Mutation(() => Projects, {
-    description: 'Update an existing project'
+    description: 'Update an existing project (ADMIN only)'
   })
   async updateProject(
     @Args('id') id: string,
@@ -135,30 +135,46 @@ export class ProjectsResolver {
 
   /**
    * GraphQL Mutation: Delete a project
-   * Mutation: { deleteProject(id: "uuid") }
+   * 
+   * SECURITY: Requires authentication + ADMIN role
+   * Only authenticated admins can delete projects
    */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Mutation(() => Boolean, {
-    description: 'Delete a project'
+    description: 'Delete a project (ADMIN only)'
   })
   async deleteProject(@Args('id') id: string): Promise<boolean> {
     return this.projectsService.remove(id);
   }
 
   /**
-   * GraphQL Mutation: Upload and set project image
-   * Mutation: { uploadProjectImage(projectId: "uuid", file: Upload!) }
+   * GraphQL Query: Get all images for a project
+   * Query: { projectImages(projectId: "uuid") { id url public_id filename } }
    */
-  @Mutation(() => Projects, {
-    description: 'Upload and set image for a project'
+  @Query(() => [Image], {
+    name: 'projectImages',
+    description: 'Get all images for a specific project'
   })
-  async uploadProjectImage(
+  async getProjectImages(@Args('projectId') projectId: string): Promise<Image[]> {
+    return this.projectsService.getProjectImages(projectId);
+  }
+
+  /**
+   * GraphQL Mutation: Delete a project image
+   * 
+   * SECURITY: Requires authentication + ADMIN role
+   * Only authenticated admins can delete project images
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Mutation(() => Projects, {
+    description: 'Delete a specific image from a project (ADMIN only)'
+  })
+  async deleteProjectImage(
     @Args('projectId') projectId: string,
-    @Args('file', { type: () => GraphQLUpload }) file: FileUpload
+    @Args('imageId') imageId: string
   ): Promise<Projects> {
-    // Upload the image
-    const imageUrl = await this.uploadService.uploadImage(file, 'projects');
-    
-    // Update the project with the new image URL
-    return this.projectsService.update(projectId, { imageUrl });
+    return this.projectsService.deleteProjectImage(projectId, imageId);
   }
 }

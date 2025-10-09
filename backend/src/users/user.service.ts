@@ -44,6 +44,15 @@ export class UserService {
 	}
 
 	/**
+	 * Finds a user by their ID (alias for findOne, used by JWT strategy)
+	 * @param id - The user's unique identifier
+	 * @returns Promise<User | null> - User object or null if not found
+	 */
+	async findById(id: string): Promise<User | null> {
+		return this.userRepository.findOne({ where: { id: id } });
+	}
+
+	/**
 	 * Finds a user by their email address (used for authentication)
 	 * @param email - The user's email address
 	 * @returns Promise<User | null> - User object or null if not found

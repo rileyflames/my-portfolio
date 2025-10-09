@@ -1,11 +1,13 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AboutMe } from './entities/aboutMe.entity';
 import { CreateAboutMeInput } from './dto/create-aboutMe.input';
 import { UpdateAboutMeInput } from './dto/update-aboutMe.input';
-import { TechnologiesService } from '../technologies/technologies.service';
-import { Tech } from '../technologies/entities/tech.entity';
+import { SkillsService } from '../skills/skills.service';
+import { Skill } from '../skills/entities/skill.entity';
+import { ImagesService } from '../images/images.service';
+import { Image } from '../images/entities/image.entity';
 
 /**
  * AboutMeService handles personal information management
@@ -18,8 +20,11 @@ export class AboutMeService {
     @InjectRepository(AboutMe)
     private readonly aboutMeRepository: Repository<AboutMe>,
     
-    // Inject TechnologiesService for managing personal skills
-    private readonly technologiesService: TechnologiesService,
+    // Inject SkillsService for managing personal skills
+    private readonly skillsService: SkillsService,
+    
+    // Inject ImagesService for managing images
+    private readonly imagesService: ImagesService,
   ) {}
 
   /**
@@ -52,10 +57,10 @@ export class AboutMeService {
       throw new ConflictException('AboutMe information already exists. Use update instead.');
     }
 
-    // Load technologies if provided
-    let technologies: Tech[] = [];
+    // Load skills if provided
+    let technologies: Skill[] = [];
     if (createAboutMeInput.technologyIds && createAboutMeInput.technologyIds.length > 0) {
-      technologies = await this.technologiesService.findByIds(createAboutMeInput.technologyIds);
+      technologies = await this.skillsService.findByIds(createAboutMeInput.technologyIds);
       
       // Check if all requested technologies were found
       if (technologies.length !== createAboutMeInput.technologyIds.length) {
@@ -106,7 +111,7 @@ export class AboutMeService {
     let technologies = aboutMe.technologies; // Keep existing technologies by default
     if (updateAboutMeInput.technologyIds !== undefined) {
       if (updateAboutMeInput.technologyIds.length > 0) {
-        technologies = await this.technologiesService.findByIds(updateAboutMeInput.technologyIds);
+        technologies = await this.skillsService.findByIds(updateAboutMeInput.technologyIds);
         
         // Check if all requested technologies were found
         if (technologies.length !== updateAboutMeInput.technologyIds.length) {
@@ -179,5 +184,79 @@ export class AboutMeService {
     }
     
     return aboutMe;
+  }
+
+  /**
+   * Upload and set profile image for AboutMe
+   * Replaces existing image if present
+   * @param file - The uploaded file
+   * @returns Promise<AboutMe> - Updated AboutMe with new image
+   */
+  async uploadProfileImage(file: Express.Multer.File): Promise<AboutMe> {
+    const aboutMe = await this.getAboutMe();
+    if (!aboutMe) {
+      throw new NotFoundException('AboutMe information not found. Create it first.');
+    }
+
+    // Delete existing image if present
+    const existingImages = await this.imagesService.findImages({ ownerId: aboutMe.id });
+    if (existingImages.data.length > 0) {
+      // Delete all existing AboutMe images (should be only one)
+      for (const img of existingImages.data) {
+        await this.imagesService.deleteImage(img.id);
+      }
+    }
+
+    // Upload new image
+    const image = await this.imagesService.uploadImage(file, {
+      owner_id: aboutMe.id,
+      alt_text: `${aboutMe.fullName} profile picture`,
+    });
+
+    // Update AboutMe with new image URL
+    aboutMe.imageUrl = image.url;
+    await this.aboutMeRepository.save(aboutMe);
+
+    return this.getAboutMe() as Promise<AboutMe>;
+  }
+
+  /**
+   * Delete profile image from AboutMe
+   * @returns Promise<AboutMe> - Updated AboutMe without image
+   */
+  async deleteProfileImage(): Promise<AboutMe> {
+    const aboutMe = await this.getAboutMe();
+    if (!aboutMe) {
+      throw new NotFoundException('AboutMe information not found');
+    }
+
+    // Find and delete the image
+    const existingImages = await this.imagesService.findImages({ ownerId: aboutMe.id });
+    if (existingImages.data.length === 0) {
+      throw new NotFoundException('No profile image found');
+    }
+
+    // Delete the image (from both Cloudinary and database)
+    await this.imagesService.deleteImage(existingImages.data[0].id);
+
+    // Update AboutMe to remove image URL
+    aboutMe.imageUrl = undefined;
+    await this.aboutMeRepository.save(aboutMe);
+
+    return this.getAboutMe() as Promise<AboutMe>;
+  }
+
+  /**
+   * Get profile image for AboutMe
+   * @returns Promise<Image | null> - The profile image or null
+   */
+  async getProfileImage(): Promise<Image | null> {
+    const aboutMe = await this.getAboutMe();
+    if (!aboutMe) {
+      return null;
+    }
+
+    const images = await this.imagesService.findImages({ ownerId: aboutMe.id });
+    return images.data.length > 0 ? images.data[0] : null;
   }
 }

@@ -33,11 +33,17 @@ export class UpdateProjectInput {
   })
   progress?: 'pending' | 'in-progress' | 'finished';
 
-  // Project image URL (optional for updates)
+  // Project image URL (optional for updates) - featured/main image
   @Field({ nullable: true })
   @IsOptional()
   @IsUrl({}, { message: 'Image URL must be a valid URL' })
   imageUrl?: string;
+
+  // Array of project images (optional for updates) - gallery
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  images?: string[];
 
   // Project description (optional for updates)
   @Field({ nullable: true })

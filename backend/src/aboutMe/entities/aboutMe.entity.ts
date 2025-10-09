@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { Tech } from '../../technologies/entities/tech.entity';
+import { Skill } from '../../skills/entities/skill.entity';
 import { SocialMedia } from '../../socialMedia/entities/socialMedia.entity';
 
 @ObjectType()
@@ -31,11 +31,11 @@ export class AboutMe {
     @Column('text')
     bio: string;
 
-    // many-to-many relation to technologies (joined table)
-    @Field(() => [Tech])
-    @ManyToMany(() => Tech, { eager: true })
+    // many-to-many relation to skills (joined table)
+    @Field(() => [Skill])
+    @ManyToMany(() => Skill, { eager: true })
     @JoinTable()
-    technologies: Tech[];
+    technologies: Skill[];
 
     // one-to-many relation to social links
     @Field(() => [SocialMedia])

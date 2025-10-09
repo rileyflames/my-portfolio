@@ -421,7 +421,7 @@ const MessagesManager = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 dark:border-purple-400"></div>
       </div>
     )
   }
@@ -430,36 +430,36 @@ const MessagesManager = () => {
     <div className="space-y-6">
       {/* Header with stats */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Messages</h2>
-        <p className="text-gray-600">Manage contact form submissions</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Messages</h2>
+        <p className="text-gray-600 dark:text-gray-400">Manage contact form submissions</p>
       </div>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <div className="text-sm text-gray-600">Total Messages</div>
-          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-4">
+          <div className="text-sm text-gray-600 dark:text-gray-400">Total Messages</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</div>
         </div>
-        <div className="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg" onClick={() => setCurrentView('unread')}>
-          <div className="text-sm text-gray-600">Unread</div>
-          <div className="text-2xl font-bold text-orange-600">{stats.unread}</div>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" onClick={() => setCurrentView('unread')}>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Unread</div>
+          <div className="text-2xl font-bold text-orange-500 dark:text-orange-400">{stats.unread}</div>
           {stats.unread > 0 && (
-            <div className="mt-1 text-xs text-orange-600">● New messages</div>
+            <div className="mt-1 text-xs text-orange-500 dark:text-orange-400">● New messages</div>
           )}
         </div>
-        <div className="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg" onClick={() => setCurrentView('read')}>
-          <div className="text-sm text-gray-600">Read</div>
-          <div className="text-2xl font-bold text-green-600">{stats.read}</div>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" onClick={() => setCurrentView('read')}>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Read</div>
+          <div className="text-2xl font-bold text-green-500 dark:text-green-400">{stats.read}</div>
         </div>
-        <div className="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg" onClick={() => setCurrentView('trash')}>
-          <div className="text-sm text-gray-600">Trash</div>
-          <div className="text-2xl font-bold text-red-600">{stats.deleted}</div>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" onClick={() => setCurrentView('trash')}>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Trash</div>
+          <div className="text-2xl font-bold text-red-500 dark:text-red-400">{stats.deleted}</div>
         </div>
       </div>
 
       {/* View Tabs */}
-      <div className="bg-white rounded-lg shadow-md">
-        <div className="border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+        <div className="border-b border-gray-200 dark:border-gray-700">
           <nav className="-mb-px flex space-x-8 px-6">
             {[
               { id: 'inbox' as ViewType, label: 'Inbox', icon: '📥' },
@@ -476,15 +476,15 @@ const MessagesManager = () => {
                 className={`
                   py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2
                   ${currentView === tab.id
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-purple-600 dark:border-purple-400 text-purple-600 dark:text-purple-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                   }
                 `}
               >
                 <span>{tab.icon}</span>
                 {tab.label}
                 {tab.count !== undefined && tab.count > 0 && (
-                  <span className="ml-2 bg-orange-100 text-orange-800 text-xs font-semibold px-2 py-0.5 rounded-full">
+                  <span className="ml-2 bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 text-xs font-semibold px-2 py-0.5 rounded-full border border-orange-300 dark:border-orange-700">
                     {tab.count}
                   </span>
                 )}
@@ -494,7 +494,7 @@ const MessagesManager = () => {
         </div>
 
         {/* Search and Bulk Actions */}
-        <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           {/* Search */}
           <div className="flex-1 max-w-md">
             <input
@@ -502,7 +502,7 @@ const MessagesManager = () => {
               placeholder="Search messages..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
           </div>
 
@@ -510,7 +510,7 @@ const MessagesManager = () => {
           <div className="flex gap-2">
             {selectedIds.length > 0 && (
               <>
-                <span className="px-3 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg">
+                <span className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg">
                   {selectedIds.length} selected
                 </span>
                 {currentView === 'trash' ? (
@@ -532,7 +532,7 @@ const MessagesManager = () => {
                 )}
                 <button
                   onClick={deselectAll}
-                  className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Deselect All
                 </button>
@@ -541,7 +541,7 @@ const MessagesManager = () => {
             {selectedIds.length === 0 && filteredMessages.length > 0 && (
               <button
                 onClick={selectAll}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 Select All
               </button>
@@ -550,17 +550,17 @@ const MessagesManager = () => {
         </div>
 
         {/* Messages List */}
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
           {filteredMessages.length === 0 ? (
-            <div className="p-12 text-center text-gray-500">
+            <div className="p-12 text-center text-gray-500 dark:text-gray-400">
               {searchTerm ? 'No messages found matching your search' : 'No messages in this view'}
             </div>
           ) : (
             filteredMessages.map((message) => (
               <div
                 key={message.id}
-                className={`p-4 hover:bg-gray-50 transition-colors ${
-                  !message.isRead && currentView !== 'trash' ? 'bg-blue-50' : ''
+                className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                  !message.isRead && currentView !== 'trash' ? 'bg-purple-50 dark:bg-purple-900/20' : ''
                 }`}
               >
                 <div className="flex items-start gap-4">
@@ -569,7 +569,7 @@ const MessagesManager = () => {
                     type="checkbox"
                     checked={selectedIds.includes(message.id)}
                     onChange={() => toggleSelection(message.id)}
-                    className="mt-1 h-4 w-4 text-blue-600 rounded"
+                    className="mt-1 h-4 w-4 text-purple-600 rounded"
                   />
 
                   {/* Message Content */}
@@ -577,21 +577,21 @@ const MessagesManager = () => {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <h3 className={`text-sm font-semibold ${!message.isRead ? 'text-gray-900' : 'text-gray-700'}`}>
+                          <h3 className={`text-sm font-semibold ${!message.isRead ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
                             {message.fullName}
                           </h3>
                           {!message.isRead && currentView !== 'trash' && (
-                            <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                            <span className="w-2 h-2 bg-purple-500 dark:bg-purple-400 rounded-full"></span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600">{message.email} • {message.city}</p>
-                        <p className={`text-sm mt-1 ${!message.isRead ? 'font-medium text-gray-900' : 'text-gray-700'}`}>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{message.email} • {message.city}</p>
+                        <p className={`text-sm mt-1 ${!message.isRead ? 'font-medium text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
                           {message.subject}
                         </p>
-                        <p className="text-sm text-gray-500 mt-1 truncate">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">
                           {message.messageDescription}
                         </p>
-                        <p className="text-xs text-gray-400 mt-2">
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                           {new Date(message.createdAt).toLocaleString()}
                         </p>
                       </div>
@@ -602,14 +602,14 @@ const MessagesManager = () => {
                           <>
                             <button
                               onClick={() => restoreMessage(message.id)}
-                              className="px-3 py-1 text-sm text-green-600 border border-green-600 rounded hover:bg-green-50"
+                              className="px-3 py-1 text-sm text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 rounded hover:bg-green-50 dark:hover:bg-green-900/20"
                               title="Restore message"
                             >
                               Restore
                             </button>
                             <button
                               onClick={() => permanentDelete(message.id)}
-                              className="px-3 py-1 text-sm text-red-600 border border-red-600 rounded hover:bg-red-50"
+                              className="px-3 py-1 text-sm text-red-600 dark:text-red-400 border border-red-600 dark:border-red-400 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
                               title="Permanently delete"
                             >
                               Delete Forever
@@ -619,14 +619,14 @@ const MessagesManager = () => {
                           <>
                             <button
                               onClick={() => openMessage(message)}
-                              className="px-3 py-1 text-sm text-blue-600 border border-blue-600 rounded hover:bg-blue-50"
+                              className="px-3 py-1 text-sm text-purple-600 dark:text-purple-400 border border-purple-600 dark:border-purple-400 rounded hover:bg-purple-50 dark:hover:bg-purple-900/20"
                               title="Open message"
                             >
                               Open
                             </button>
                             <button
                               onClick={() => deleteMessage(message.id)}
-                              className="px-3 py-1 text-sm text-red-600 border border-red-600 rounded hover:bg-red-50"
+                              className="px-3 py-1 text-sm text-red-600 dark:text-red-400 border border-red-600 dark:border-red-400 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
                               title="Move to trash"
                             >
                               Delete
@@ -645,26 +645,26 @@ const MessagesManager = () => {
 
       {/* Message Viewer Modal */}
       {selectedMessage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">{selectedMessage.subject}</h3>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{selectedMessage.subject}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     From: {selectedMessage.fullName} ({selectedMessage.email})
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     Location: {selectedMessage.city}
                   </p>
-                  <p className="text-xs text-gray-400 mt-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
                     Received: {new Date(selectedMessage.createdAt).toLocaleString()}
                   </p>
                 </div>
                 <button
                   onClick={closeMessage}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -676,19 +676,19 @@ const MessagesManager = () => {
             {/* Modal Body */}
             <div className="p-6">
               <div className="prose max-w-none">
-                <p className="text-gray-900 whitespace-pre-wrap">{selectedMessage.messageDescription}</p>
+                <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{selectedMessage.messageDescription}</p>
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="p-6 border-t border-gray-200 flex gap-3">
+            <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-3">
               {selectedMessage.isRead ? (
                 <button
                   onClick={() => {
                     markAsUnread(selectedMessage.id)
                     closeMessage()
                   }}
-                  className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Mark as Unread
                 </button>
@@ -698,7 +698,7 @@ const MessagesManager = () => {
                     markAsRead(selectedMessage.id)
                     closeMessage()
                   }}
-                  className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Mark as Read
                 </button>
@@ -714,7 +714,7 @@ const MessagesManager = () => {
               </button>
               <button
                 onClick={closeMessage}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 Close
               </button>

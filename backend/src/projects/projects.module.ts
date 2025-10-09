@@ -3,9 +3,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Projects } from './entities/project.entity';
 import { ProjectsService } from './projects.service';
 import { ProjectsResolver } from './projects.resolver';
-import { TechnologiesModule } from '../technologies/technologies.module';
+import { ProjectsController } from './projects.controller';
+import { SkillsModule } from '../skills/skills.module';
 import { UserModule } from '../users/user.module';
-import { UploadModule } from '../upload/upload.module';
+import { ImagesModule } from '../images/images.module';
+import { ContributorsModule } from '../contributors/contributors.module';
 
 /**
  * Projects Module
@@ -18,9 +20,13 @@ import { UploadModule } from '../upload/upload.module';
     TypeOrmModule.forFeature([Projects]),
     
     // Import other modules we depend on
-    TechnologiesModule, // For managing project technologies
+    SkillsModule,       // For managing project skills
     UserModule,         // For managing project creators/editors
-    UploadModule,       // For image upload functionality
+    ImagesModule,       // For image management with Cloudinary
+    ContributorsModule, // For managing project contributors
+  ],
+  controllers: [
+    ProjectsController  // REST controller for file uploads
   ],
   providers: [
     ProjectsService,  // Service containing business logic

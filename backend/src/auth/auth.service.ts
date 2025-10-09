@@ -1,6 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt'
 import { UserService } from 'src/users/user.service';
+import { InputSanitizerService } from 'src/security/input-sanitizer.service';
+import { LoginAttemptTrackerGuard } from './guards/login-attempt-tracker.guard';
 import * as argon2 from 'argon2';
 
 @Injectable()
@@ -9,7 +11,11 @@ export class AuthService {
         // Inject UserService to access user-related operations
         private userService: UserService,
         // Inject JwtService to create and verify JWT tokens
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        // Inject InputSanitizerService to prevent injection attacks
+        private inputSanitizer: InputSanitizerService,
+        // Inject LoginAttemptTrackerGuard to prevent brute-force attacks
+        private loginAttemptTracker: LoginAttemptTrackerGuard,
     ) { }
 
     /**
@@ -41,22 +47,38 @@ export class AuthService {
      * @throws UnauthorizedException if credentials are invalid
      */
     async login(input: { email: string, password: string }) {
+        // SECURITY: Sanitize email input to prevent injection attacks
+        const sanitizedEmail = this.inputSanitizer.sanitizeEmail(input.email);
+        
+        // SECURITY: Check for progressive delay based on failed attempts
+        const delay = this.loginAttemptTracker.getDelay(sanitizedEmail);
+        if (delay > 0) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+
         // Find user by email
-        const user = await this.userService.findByEmail(input.email);
+        const user = await this.userService.findByEmail(sanitizedEmail);
         if (!user) {
-            // Throw proper HTTP exception instead of generic Error
+            // SECURITY: Record failed attempt
+            this.loginAttemptTracker.recordFailedAttempt(sanitizedEmail);
+            // Generic error message - don't reveal if email exists
             throw new UnauthorizedException('Invalid credentials');
         }
 
         // Verify the provided password against the stored hash
         const valid = await argon2.verify(user.password, input.password);
         if (!valid) {
+            // SECURITY: Record failed attempt
+            this.loginAttemptTracker.recordFailedAttempt(sanitizedEmail);
             throw new UnauthorizedException('Invalid credentials');
         }
 
+        // SECURITY: Record successful login (resets failed attempts)
+        this.loginAttemptTracker.recordSuccessfulLogin(sanitizedEmail);
+
         // Create JWT payload with user information
         // 'sub' is a standard JWT claim meaning 'subject' (user ID)
-        const payload = { email: user.email, sub: user.id };
+        const payload = { email: user.email, sub: user.id, role: user.role };
 
         // Return the access token and user information
         // This matches the LoginResponse structure
