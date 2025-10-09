@@ -57,7 +57,7 @@ function Footer() {
             to="/" 
             className="inline-flex items-center gap-2 transition-all duration-200 hover:opacity-80"
           >
-            <span className="text-xl font-bold text-purple-600 dark:text-red-500" style={{ textShadow: '0 0 1px #a855f7, 0 0 2px #a855f7' }}>AM</span>
+            <span className="text-xl font-bold text-purple-600 dark:text-red-500" style={{ textShadow: '0 0 1px #a855f7, 0 0 2px #a855f7' }}>Logo</span>
           </Link>
         </div>
 
@@ -153,7 +153,7 @@ function Footer() {
         <div className="pt-8 border-t border-gray-200 dark:border-gray-700">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              © 2025 Anthony M M. All rights reserved.
+              © 2025 Your Name. All rights reserved.
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Built with NestJS and React

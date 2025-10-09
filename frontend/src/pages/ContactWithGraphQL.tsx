@@ -269,7 +269,7 @@ const ContactWithGraphQL = () => {
           </p>
           <div className="flex justify-center space-x-6">
             {/* You can add actual contact links here */}
-            <span className="text-blue-600 font-medium">anthony@example.com</span>
+            <span className="text-blue-600 font-medium">your@example.com</span>
             <span className="text-gray-400">|</span>
             <span className="text-blue-600 font-medium">LinkedIn</span>
             <span className="text-gray-400">|</span>

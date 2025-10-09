@@ -73,7 +73,7 @@ const Navbar = () => {
               to="/" 
               className="flex items-center gap-2 transition-all duration-200 hover:opacity-80"
             >
-              <span className="text-2xl font-bold text-purple-600 dark:text-red-500" style={{ textShadow: '0 0 1px #a855f7, 0 0 2px #a855f7' }}>AM</span>
+              <span className="text-2xl font-bold text-purple-600 dark:text-red-500" style={{ textShadow: '0 0 1px #a855f7, 0 0 2px #a855f7' }}>Logo</span>
             </Link>
           </div>
           
